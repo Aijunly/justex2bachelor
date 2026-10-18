@@ -1,0 +1,406 @@
+% -*- coding=utf-8 -*-
+% ============================================================================
+% 文件名称：boyogala-setting.tex
+% ============================================================================
+% ============================================================================
+% 1. 核心宏包按需加载（已去除与 ctexbook / unicode-math 冲突或冗余的旧式 Type1 字体包）
+% ============================================================================
+\usepackage{wallpaper}                          % 封面及内封整页 PDF 底图铺设支持（提供 \ThisTileWallPaper）
+\usepackage{amsmath,mathtools,amsthm}           % 数学公式增强与定理环境核心支持（在 unicode-math 之前加载）
+\usepackage{etoolbox}                           % 编译期钩子工具（提供 \apptocmd、\AtBeginEnvironment 等补丁命令）
+\usepackage{xcolor}                             % 增强型颜色支持（支持 listings 代码框中 gray!30、green!70!black 等混色语法）
+\usepackage{fancyhdr}                           % 自定义页眉与页脚样式（实现奇偶页页眉文字、装饰线与居中页码）
+\usepackage{geometry}                           % 页面版心尺寸、四周边距、装订线与页眉页脚空间精确控制
+\usepackage{fontspec}                           % XeLaTeX OpenType/TrueType 本地字体路径与字重精确绑定支持
+\usepackage{unicode-math}                       % 现代 OpenType 数学排版引擎（完全替代旧式 8-bit amsfonts/amssymb/bm/wasysym）
+\usepackage{setspace}                           % 局部行距调节支持（提供声明页 \begin{spacing}{2.0} 与文献 \setstretch）
+\usepackage{indentfirst}                        % 确保各章节标题后的第一段默认首行缩进
+\usepackage{titletoc}                           % 目录条目格式定制（提供 \titlecontents 控制缩进、字体与引导点线）
+\usepackage[inline]{enumitem}                   % 列表环境间距与行内列表定制（提供 \setlist 全局压缩列表空白）
+\usepackage{graphicx,ragged2e}                  % 插图加载（\includegraphics、\graphicspath）与对齐辅助支持
+\usepackage{subcaption}                         % 分图（subfigure / \subcaptionbox）排版与独立分图题注支持
+\usepackage{bicaption}                          % 图表双语题注支持（提供 \bicaption 同时输出中英文双行图题/表题）
+\usepackage{longtable,booktabs}                 % 跨页长表格（longtable）与标准三线表（\toprule/\midrule/\bottomrule）支持
+\usepackage{listings}                           % 源代码清单排版、语法高亮、自动换行与阴影外框支持
+\usepackage[plainruled,linesnumbered,algochapter]{algorithm2e} % 算法伪代码排版：三线风格、显示行号、按章编号
+\usepackage{hyperref}                           % 交叉引用超链接与 PDF 书签大纲自动生成
+
+% ============================================================================
+% 2. 行间数学公式上下间距精调
+% ============================================================================
+% 定义紧凑的行间公式（display math）上下弹性间距，避免 20pt 正文行距下公式前后空白过大
+\newcommand{\setmydisplayskip}{%
+  \setlength{\abovedisplayskip}{3pt plus 1pt minus 1pt}%       % 长行间公式上方间距设为 3pt（可伸缩 ±1pt）
+  \setlength{\belowdisplayskip}{3pt plus 1pt minus 1pt}%       % 长行间公式下方间距设为 3pt（可伸缩 ±1pt）
+  \setlength{\abovedisplayshortskip}{3pt plus 1pt minus 1pt}%  % 前行文字较短时行间公式上方间距设为 3pt
+  \setlength{\belowdisplayshortskip}{3pt plus 1pt minus 1pt}%  % 前行文字较短时行间公式下方间距设为 3pt
+}
+% 将公式间距设置挂载到 \normalsize 末尾，防止切换字号时被 LaTeX 重置为默认值
+\apptocmd{\normalsize}{\setmydisplayskip}{}{}
+
+% ============================================================================
+% 3. 纸张尺寸、页边距、字体回退与页眉页脚样式（对应规范 3.2、4.1、4.2、4.4 节）
+% ============================================================================
+% 规范要求：A4 纸（210mm×297mm）双面打印；上 30mm、下 25mm、内侧（装订侧）28mm、外侧 25mm；
+%           页眉距上缘约 20mm，页脚距下缘约 17.5mm
+\geometry{%
+  paperwidth  = 210mm,                          % 标准 A4 纸张宽度 210mm
+  paperheight = 297mm,                          % 标准 A4 纸张高度 297mm
+  twoside,                                      % 双面奇偶页对称交换内外边距（奇数页左28mm右25mm，偶数页左25mm右28mm）
+  top         = 30mm,                           % 正文版心上边距 30mm
+  bottom      = 25mm,                           % 正文版心下边距 25mm
+  inner       = 28mm,                           % 装订侧（内侧）边距 28mm
+  outer       = 25mm,                           % 切口侧（外侧）边距 25mm
+  headheight  = 24pt,                           % 页眉盒子高度 24pt（约 8.4mm，消除 fancyhdr 高度不足警告）
+  headsep     = 5.8mm,                          % 页眉基线至正文顶部间距 5.8mm（使页眉视觉位置距纸张上缘约 20mm）
+  footskip    = 7.5mm                           % 正文底部至页脚基线间距 7.5mm（25mm - 7.5mm = 17.5mm，契合规范页脚位置）
+}
+
+% ----------------------------------------------------------------------------
+% 3.1 本地字完备（Self-Contained）全套字体精确绑定（仅从 font/ 目录加载，零系统与第三方字库依赖）
+% ----------------------------------------------------------------------------
+% [1] 西文衬线主字体（\rmfamily）：采用 STI Pub 学术出版联盟最新研发的 STIX Two Text (v2.13)
+%     兼具经典 Times 衬线风格与更高的 x-height 阅读舒适度，与下方 STIX Two Math 数学字体同源无缝衔接
+\setmainfont{STIXTwoText-Regular.ttf}[          % 直接指定本地文件名，防止 fontspec 检索系统或 TeX Live 外部配置
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录检索字体文件，绝不调用操作系统字库
+  BoldFont       = STIXTwoText-Bold.ttf,        % 粗体绑定 font/STIXTwoText-Bold.ttf
+  ItalicFont     = STIXTwoText-Italic.ttf,      % 斜体绑定 font/STIXTwoText-Italic.ttf
+  BoldItalicFont = STIXTwoText-BoldItalic.ttf   % 粗斜体绑定 font/STIXTwoText-BoldItalic.ttf
+]
+
+% [2] 西文无衬线字体（\sffamily）：采用 Adobe 最新第 3 代开源无衬线字体 Source Sans 3 (v3.052)
+%     与中文思源黑体（Source Han Sans CN）为官方同源西文搭档，笔画黑度与字面率高度一致
+\setsansfont{SourceSans3-Regular.otf}[          % 直接指定本地常规正体文件名 font/SourceSans3-Regular.otf
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录检索字体文件
+  BoldFont       = SourceSans3-Bold.otf,        % 粗体绑定 font/SourceSans3-Bold.otf
+  ItalicFont     = SourceSans3-It.otf,          % 斜体绑定 font/SourceSans3-It.otf
+  BoldItalicFont = SourceSans3-BoldIt.otf       % 粗斜体绑定 font/SourceSans3-BoldIt.otf
+]
+
+% [3] 代码与西文等宽字体（\ttfamily）：采用 JetBrains 专为开发者设计的 JetBrains Mono (v2.304)
+%     四字重齐全，原生内置完整希腊字母（如 Julia/Python 代码中的 \lambda），彻底避免回退系统或第三方包字体
+\setmonofont{JetBrainsMono-Regular.ttf}[        % 直接指定本地文件名，杜绝触发 TeX Live 中 jetbrainsmono.fontspec
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录检索字体文件
+  BoldFont       = JetBrainsMono-Bold.ttf,      % 粗体绑定 font/JetBrainsMono-Bold.ttf
+  ItalicFont     = JetBrainsMono-Italic.ttf,    % 斜体绑定 font/JetBrainsMono-Italic.ttf
+  BoldItalicFont = JetBrainsMono-BoldItalic.ttf,% 粗斜体绑定 font/JetBrainsMono-BoldItalic.ttf
+  Scale          = MatchLowercase,              % 自动匹配正文小写字母高度，使行内代码与代码清单视觉比例协调
+  Ligatures      = TeXOff                       % 关闭 TeX 传统连字（防止代码中 -- 或 '' 被合并为破折号或引号）
+]
+
+% [4] 数学公式字体（unicode-math）：采用顶级学术数学字体 STIX Two Math (v2.13, 6760 字形)
+%     完整涵盖拉丁/希腊正斜体、粗体向量(\mathbf/\symbf)、空心黑板粗体(\mathbb)、花体(\mathcal)、
+%     多级定界符及复选框符号，彻底摆脱 TeX 传统 Type1 (CMMI/CMSY/MSAM/MSBM/wasy) 第三方宏包字体
+\setmathfont{STIXTwoMath-Regular.ttf}[          % 设置全局主数学字体为本地 STIXTwoMath-Regular.ttf
+  Path           = font/                        % 强制仅从项目本地 font/ 目录加载
+]
+\setmathfont{STIXTwoMath-Regular.ttf}[          % 针对花体 \mathcal 与粗花体 \mathbfcal 单独启用 ss01 样式集
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录加载
+  range          = {\mathcal,\mathbfcal},       % 作用范围限定为 \mathcal 与 \mathbfcal（保留 \mathscr 为手写花体）
+  StylisticSet   = 1                            % 启用更符合国内数学教材习惯的经典正统花体字形
+]
+\setmathfont{XITSMath-Bold.otf}[                % 设置粗体数学版本（\boldmath）专用字体
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录加载
+  version        = bold                         % 绑定至 bold 数学字重版本，杜绝伪粗体数学公式告警
+]
+\providecommand{\bm}[1]{\symbf{#1}}             % 兼容传统 \bm 粗体向量写法，直接映射为 OpenType 原生数学粗体符号
+
+% [5] 中文主字体与四大家族字体（宋体、黑体、楷体、仿宋）：全部限定从本地 font/ 目录加载最新开源精品字库
+%     - 宋体：Noto Serif CJK SC（思源宋体 v2.003，满配 65,535 字形，含 Regular 与原生 Bold 双字重，生僻字全覆盖）
+%     - 黑体：Source Han Sans CN（思源黑体 v2.004，31,036 字形，含 Regular 与原生 Bold 双字重，标题庄重清晰）
+%     - 楷体：LXGW WenKai（霞鹜文楷 2026 最新 v1.530，47,336 字形，含扩展 A 区汉字，兼具传统笔意与现代阅读舒适度）
+%     - 仿宋：Zhuque Fangsong（朱雀仿宋 v0.212，13,805 字形，基于民国经典铅印仿宋重绘，字形秀丽稳健）
+\setCJKmainfont{NotoSerifCJKsc-Regular.otf}[    % 设置中文默认主衬线字体为思源宋体 Regular
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录加载
+  BoldFont       = NotoSerifCJKsc-Bold.otf,     % 中文 \bfseries 加粗直接调用原生思源宋体 Bold（非描边伪粗体）
+  ItalicFont     = LXGWWenKai-Regular.ttf,      % 中文 \itshape 斜体自动映射为霞鹜文楷
+  BoldItalicFont = NotoSerifCJKsc-Bold.otf      % 中文粗斜体映射为思源宋体 Bold
+]
+\setCJKsansfont{SourceHanSansCN-Regular.otf}[   % 设置中文默认无衬线字体为思源黑体 Regular
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录加载
+  BoldFont       = SourceHanSansCN-Bold.otf,    % 无衬线加粗直接调用原生思源黑体 Bold
+  ItalicFont     = LXGWWenKai-Regular.ttf       % 无衬线斜体映射为霞鹜文楷
+]
+\setCJKmonofont{ZhuqueFangsong-Regular.ttf}[    % 设置中文默认等宽字体为朱雀仿宋（用于代码注释等宽环境）
+  Path           = font/,                       % 强制仅从项目本地 font/ 目录加载
+  AutoFakeBold   = 2.0,                         % 为单字重仿宋启用适度伪粗体支持
+  ItalicFont     = LXGWWenKai-Regular.ttf       % 等宽斜体映射为霞鹜文楷
+]
+
+% 显式声明 zhsong / zhhei / zhkai / zhfs 四大中文字族及对应切换命令（配合文档类 fontset=none 实现 100% 本地化）
+\setCJKfamilyfont{zhsong}{NotoSerifCJKsc-Regular.otf}[  % 注册“宋体”字族 zhsong
+  Path           = font/,                       % 强制仅从本地 font/ 目录加载
+  BoldFont       = NotoSerifCJKsc-Bold.otf,     % 宋体加粗调用原生思源宋体 Bold（如声明页小二宋体加粗标题）
+  ItalicFont     = LXGWWenKai-Regular.ttf       % 宋体斜体调用霞鹜文楷
+]
+\setCJKfamilyfont{zhhei}{SourceHanSansCN-Regular.otf}[  % 注册“黑体”字族 zhhei
+  Path           = font/,                       % 强制仅从本地 font/ 目录加载
+  BoldFont       = SourceHanSansCN-Bold.otf     % 黑体加粗调用原生思源黑体 Bold
+]
+\setCJKfamilyfont{zhkai}{LXGWWenKai-Regular.ttf}[       % 注册“楷体”字族 zhkai
+  Path           = font/,                       % 强制仅从本地 font/ 目录加载
+  AutoFakeBold   = 2.0                          % 楷体加粗启用伪粗体支持
+]
+\setCJKfamilyfont{zhfs}{ZhuqueFangsong-Regular.ttf}[    % 注册“仿宋”字族 zhfs
+  Path           = font/,                       % 强制仅从本地 font/ 目录加载
+  AutoFakeBold   = 2.0                          % 仿宋加粗启用伪粗体支持
+]
+\DeclareDocumentCommand{\songti}{}{\CJKfamily{zhsong}}  % 定义 \songti 切换至本地思源宋体
+\DeclareDocumentCommand{\heiti}{}{\CJKfamily{zhhei}}    % 定义 \heiti 切换至本地思源黑体
+\DeclareDocumentCommand{\kaishu}{}{\CJKfamily{zhkai}}   % 定义 \kaishu 切换至本地霞鹜文楷
+\DeclareDocumentCommand{\fangsong}{}{\CJKfamily{zhfs}}  % 定义 \fangsong 切换至本地朱雀仿宋
+
+% 正文全局默认排版参数（规范 4.2 节硬性要求：小四号宋体，行间距固定值 20 磅，标准字距）
+\AtBeginDocument{%
+  \linespread{1}\songti\fontsize{12pt}{20pt}\selectfont % 文档开始时锁定倍率为1、宋体、字号12pt（小四）、基线行距固定20pt
+  \DeclareDocumentCommand{\square}{}{\ensuremath{\char"2610}}%     % 将 \square 绑定为 STIXTwoMath 内置空心复选框 ☐ (U+2610)
+  \DeclareDocumentCommand{\CheckedBox}{}{\ensuremath{\char"2611}}% % 将 \CheckedBox 绑定为 STIXTwoMath 内置打钩复选框 ☑ (U+2611)
+}
+\raggedbottom                                   % 关闭页面垂直方向强制拉伸对齐，防止段落或标题间被拉出异常空白
+\setlength{\parindent}{2em}                     % 正文段落首行缩进固定为 2 个汉字宽度（2em）
+\setlength{\emergencystretch}{3em}              % 允许行内额外紧急伸展 3em，消除中英文与行内公式混排时的右侧溢出（Overfull \hbox）
+
+% 前置部分（摘要、目录页）使用的 plain 页面样式：无页眉、无装饰线，仅页脚居中显示五号页码
+\fancypagestyle{plain}{%
+  \fancyhf{}%                                   % 清空默认页眉与页脚内容
+  \fancyfoot[C]{\zihao{5}\thepage}%             % 页脚居中打印五号（10.5pt）页码
+  \renewcommand{\headrulewidth}{0pt}%           % 将页眉默认横线宽度设为 0pt
+  \renewcommand{\headrule}{}%                   % 清空页眉装饰线绘制命令，确保摘要和目录页顶部无横线
+}
+
+% 正文及后置部分（章节、结论、参考文献、致谢、附录）通用的页眉页脚宏定义（规范 4.4 节）
+\newcommand{\justheaderfooter}{%
+  \fancyhf{}%                                   % 清空所有页眉与页脚区域
+  \fancyfoot[C]{\zihao{5}\thepage}%             % 奇偶页页脚均居中显示五号（10.5pt）Times New Roman 页码
+  \fancyhead[CE,CO]{\zihao{5}\songti 江苏科技大学本科毕业设计（论文）}% % 偶数页(CE)与奇数页(CO)页眉均居中显示五号宋体规定字样
+  \renewcommand{\headrulewidth}{0pt}%           % 关闭 fancyhdr 默认贴底横线，改用下方自定义位置横线
+  \renewcommand{\headrule}{%                    % 自定义页眉下方实线：线宽等于版心宽度 \headwidth，粗细为 0.8pt
+    \makebox[0pt][l]{\rule[.7\baselineskip]{\headwidth}{0.8pt}}%
+  }%
+}
+% 定义名为 myfancy 的正文页面样式，直接调用 \justheaderfooter
+\fancypagestyle{myfancy}{\justheaderfooter}
+
+% ============================================================================
+% 4. 正文四级标题层级格式与间距设置（对应规范 3.5、4.2、4.7 节）
+% ============================================================================
+% 规范要求：以正文 20pt 行距为基准，章段前/段后 1.5 行(30pt)，节 1.0 行(20pt)，条/款 0.5 行(10pt)
+\ctexset{
+  chapter = {                                   % 一级标题（章）：如“第 1 章 绪论”
+    name       = {第,章},                       % 章号前后缀设为“第 X 章”
+    number     = \arabic{chapter},              % 章序采用阿拉伯数字（1, 2, 3...）
+    format     = \heiti\zihao{-3}\centering,    % 字体字号：小三号（15pt）黑体，居中排写
+    beforeskip = 30pt,                          % 段前间距 1.5 行（1.5 × 20pt = 30pt）
+    afterskip  = 30pt,                          % 段后间距 1.5 行（1.5 × 20pt = 30pt）
+    fixskip    = true                           % 抑制 ctex 默认额外顶部空白，使段前段后间距精确生效
+  },
+  section = {                                   % 二级标题（节）：如“1.1 研究背景”
+    format     = \heiti\zihao{4}\raggedright,   % 字体字号：四号（14pt）黑体，左对齐顶格书写
+    beforeskip = 20pt,                          % 段前间距 1.0 行（1.0 × 20pt = 20pt）
+    afterskip  = 20pt,                          % 段后间距 1.0 行（1.0 × 20pt = 20pt）
+    fixskip    = true                           % 精确控制节标题上下间距
+  },
+  subsection = {                                % 三级标题（条）：如“1.1.1 国内外现状”
+    format     = \heiti\zihao{-4}\raggedright,  % 字体字号：小四号（12pt）黑体，左对齐顶格书写
+    beforeskip = 10pt,                          % 段前间距 0.5 行（0.5 × 20pt = 10pt）
+    afterskip  = 10pt,                          % 段后间距 0.5 行（0.5 × 20pt = 10pt）
+    fixskip    = true                           % 精确控制条标题上下间距
+  },
+  subsubsection = {                             % 四级标题（款）：如“1.1.1.1 具体方法”
+    format     = \heiti\zihao{-4}\raggedright,  % 字体字号：小四号（12pt）黑体，左对齐顶格书写
+    beforeskip = 10pt,                          % 段前间距 0.5 行（10pt）
+    afterskip  = 10pt,                          % 段后间距 0.5 行（10pt）
+    fixskip    = true                           % 精确控制款标题上下间距
+  }
+}
+% 设置章节自动编号深度为 3（即编号至四级标题 subsubsection：1.1.1.1）
+\setcounter{secnumdepth}{3}
+
+% ============================================================================
+% 5. 目录格式定制（对应规范 2.1.4、3.4、4.6 节及附录 9）
+% ============================================================================
+% 规范要求：目录题头居中；仅列至三级标题（章、节、条）；章条目用小四号黑体顶格，
+%           节、条用小四号宋体分别缩进 1 格、2 格；右侧点线引导并右对齐页码
+\renewcommand{\contentsname}{目\hspace{2em}录}  % 目录标题设为“目　录”，中间空两格
+\setcounter{tocdepth}{2}                        % 目录收录深度设为 2（仅显示 chapter、section、subsection 三级）
+
+% 一级目录条目（chapter 章）：顶格排写，小四号（12pt）黑体，行距 16.5pt
+\titlecontents{chapter}[4em]                    % 标题文本左端距版心左缘 4em（预留给“第X章”编号盒）
+  {\heiti\fontsize{12pt}{16.5pt}\selectfont}    % 章目录字体：小四号（12pt）黑体，固定行高 16.5pt
+  {\contentslabel{4em}}                         % 有编号章：在 4em 宽盒子内左对齐输出“第X章”使其顶格
+  {\hspace*{-4em}}                              % 无编号章（摘要、结论、参考文献、致谢、附录）：回退 4em 使其顶格
+  {~\titlerule*[0.6pc]{$.$}~\contentspage}      % 标题与页码之间填充间距为 0.6pc 的圆点引导线，页码居右对齐
+
+% 二级目录条目（section 节）：相对一级标题缩进 1 个汉字，小四号（12pt）宋体
+\titlecontents{section}[3em]                    % 标题文本左端距版心左缘 3em（1em 缩进 + 2em 节号盒）
+  {\songti\fontsize{12pt}{16.5pt}\selectfont}   % 节目录字体：小四号（12pt）宋体，行高 16.5pt
+  {\contentslabel{2em}}                         % 节编号（如 1.1）占宽 2em，左起位置距左缘 3em - 2em = 1em（缩进一格）
+  {\hspace*{-2em}}                              % 无编号节回退 2em
+  {~\titlerule*[0.6pc]{$.$}~\contentspage}      % 圆点引导线及右对齐页码
+
+% 三级目录条目（subsection 条）：相对一级标题缩进 2 个汉字，小四号（12pt）宋体
+\titlecontents{subsection}[6em]                 % 标题文本左端距版心左缘 6em
+  {\songti\fontsize{12pt}{16.5pt}\selectfont}   % 条目录字体：小四号（12pt）宋体，行高 16.5pt
+  {\contentslabel{3em}}                         % 条编号（如 1.1.1）占宽 3em，缩进展示清晰层次
+  {\hspace*{-2em}}                              % 无编号条回退 2em
+  {~\titlerule*[0.6pc]{$.$}~\contentspage}      % 圆点引导线及右对齐页码
+
+% ============================================================================
+% 6. 参考文献设置（对应规范 2.2.4、3.6、3.13、4.2 节及附录 6）
+% ============================================================================
+% 规范要求：按正文首次引用顺序编码；正文中右上角方括号上标引用（\upcite）；文献列表采用五号宋体
+\usepackage[
+  backend=biber,                                % 指定使用 Biber 后端处理 UTF-8 中英文混合文献数据
+  style=gb7714-2025,                            % 加载项目根目录附带的国标 GB/T 7714-2025 著录与引用样式
+  sorting=none,                                 % 严格按照文献在正文中首次被引用的先后顺序编号排列
+  gbnamefmt=lowercase,                          % 西文作者姓名采用首字母大写、其余小写的常规大小写格式
+  gbalign=gb7714-2025                           % 序号顶格对齐，换行后与作者名首字对齐（符合规范附录 6 第 7 条）
+]{biblatex}
+\addbibresource{ref.bib}                        % 挂载根目录下的 ref.bib 参考文献数据库文件
+\AtBeginBibliography{\songti\zihao{5}\setstretch{1.0}} % 将参考文献列表区域字体统一设为五号（10.5pt）宋体、单倍紧凑行距
+
+% ============================================================================
+% 7. 数学定理、引理、推论、定义、例、注与证明环境
+% ============================================================================
+% 定理、定义、引理、推论共享按章编号计数器（如“定理 2.1”后紧接“引理 2.2”），标题首行缩进 2em
+\theoremstyle{definition}                       % 切换为正体定理样式：使定理正文保持小四宋体正体，消除中文斜体加粗缺失警告
+\newtheorem{theorem}{\hskip 2em 定理}[chapter]       % 定义按章编号的“定理”环境
+\newtheorem{definition}[theorem]{\hskip 2em 定义}    % 定义与 theorem 共享编号的“定义”环境
+\newtheorem{lemma}[theorem]{\hskip 2em 引理}         % 定义与 theorem 共享编号的“引理”环境
+\newtheorem{corollary}[theorem]{\hskip 2em 推论}     % 定义与 theorem 共享编号的“推论”环境
+\newtheorem{example}{\hskip 2em 例}[chapter]         % 定义按章独立编号的“例”环境
+\newtheorem{remark}{\hskip 2em 注}[chapter]          % 定义按章独立编号的“注”环境
+\renewcommand{\proofname}{\hskip 2em \bfseries 证明}  % 将 amsthm 默认证明环境题头改为首行缩进 2em 的加粗“证明”
+
+% ============================================================================
+% 8. 数学公式按章编号（对应规范 3.10、4.8 节）
+% ============================================================================
+% 规范要求：公式序号按章编排，如第 1 章第一个公式为 (1.1)，居于右侧靠近版心右边线
+\numberwithin{equation}{chapter}
+
+% ============================================================================
+% 9. 插图、插表双语题注、表格字体与列表样式（对应规范 3.11、3.12、4.2 节）
+% ============================================================================
+% 规范要求：图题置于图下、表题置于表上，居中排写；图题、表题、表头及表内文字均采用五号宋体；
+%           图序/表序与图名/表名之间空一格
+\DeclareCaptionFont{captionsong}{\songti\zihao{5}}   % 声明中文题注专用字体：五号（10.5pt）宋体
+\DeclareCaptionFont{captiontimes}{\rmfamily\zihao{5}}% 声明英文题注专用字体：五号（10.5pt）Times New Roman
+\captionsetup{
+  labelsep=quad,                                % 图表序号（如“图 1.1”）与标题文字之间空一格（1em）
+  justification=centering,                      % 题注整体居中排写
+  singlelinecheck=true,                         % 单行题注自动居中
+  skip=6pt                                      % 题注与图表主体之间的垂直间距设为 6pt
+}
+\captionsetup[bi-first]{font=captionsong,labelfont=captionsong}     % 双语题注第一行（中文）应用五号宋体
+\captionsetup[bi-second]{font=captiontimes,labelfont=captiontimes}  % 双语题注第二行（英文）应用五号新罗马体
+\AtBeginEnvironment{figure}{\captionsetup[bi-second]{name=Fig.}}    % 插图英文题注前缀设为“Fig.”（匹配规范附录 5）
+\AtBeginEnvironment{table}{\captionsetup[bi-second]{name=Table}}    % 插表英文题注前缀设为“Table”（匹配规范附录 4）
+
+% 全局列表环境（itemize / enumerate / description）紧凑间距配置
+\setlist{
+  topsep=0.3em,                                 % 列表环境顶部及底部与上下文段落的垂直间距
+  partopsep=0pt,                                % 列表前有空行时不额外增加顶部垂直空白
+  itemsep=0ex plus 0.1ex,                       % 相邻列表项之间的垂直间距
+  parsep=0pt,                                   % 同一列表项内部段落之间的垂直间距
+  leftmargin=1.5em,                             % 列表左边界缩进量
+  rightmargin=0em,                              % 列表右边界缩进量
+  labelsep=0.5em,                               % 列表序号标签与文字之间的水平间距
+  labelwidth=2em                                % 列表序号标签盒宽度
+}
+
+\graphicspath{{figure/}{./}}                    % 设置默认图片搜索路径：优先检索 figure/ 子目录及项目根目录
+\AtBeginEnvironment{table}{\songti\zihao{5}}    % 进入普通浮动表格环境时自动切换为规范要求的五号宋体
+\AtBeginEnvironment{longtable}{\songti\zihao{5}}% 进入跨页长表格环境时自动切换为规范要求的五号宋体
+
+% ============================================================================
+% 10. 源代码清单排版配置（listings 宏包，适用于正文或附录程序代码）
+% ============================================================================
+\renewcommand{\lstlistingname}{代码}            % 将代码清单题注前缀设为中文“代码”（如“代码 1.1”）
+\lstset{
+  language=python,                              % 默认语法高亮语言设为 Python（可在具体环境中通过 language= 覆盖）
+  frame=shadowbox,                              % 绘制带右下角立体阴影的矩形外框
+  rulesepcolor=\color{gray!30},                 % 阴影边框填充为 30% 浅灰色
+  framesep=4pt,                                 % 代码框线与内部文字的基础内边距
+  xleftmargin=1.8em,                            % 代码框整体左缩进 1.8em，为左侧行号预留充足空间
+  framexleftmargin=0pt,                         % 左边框与代码对齐，使行号清晰排布于左框线外侧而不压线
+  framexrightmargin=4pt,                        % 边框向右侧扩展 4pt
+  framextopmargin=4pt,                          % 边框向上方扩展 4pt
+  framexbottommargin=4pt,                       % 边框向下方扩展 4pt
+  keywordstyle=\color{blue},                    % 语言关键字高亮为蓝色
+  commentstyle=\color{green!70!black},          % 代码注释高亮为深绿色
+  stringstyle=\color{magenta},                  % 字符串字面量高亮为洋红色
+  basicstyle=\ttfamily\small,                   % 代码主体采用小号（\small）JetBrains Mono 等宽字体
+  breaklines=true,                              % 超长代码行自动折行，防止溢出右边距
+  showstringspaces=false,                       % 不将字符串中的空格显示为特殊可见符号
+  numbers=left,                                 % 在代码框左侧显示行号
+  numberstyle=\tiny\color{gray},                % 行号采用微小字号（\tiny）灰色字体
+  tabsize=4,                                    % 制表符 Tab 等效缩进为 4 个空格
+  numbersep=8pt                                 % 行号与代码左框线之间的间距设为 8pt，杜绝与左框线重叠
+}
+
+% ============================================================================
+% 11. 交叉引用与超链接属性设置（打印版友好配置）
+% ============================================================================
+\hypersetup{
+  colorlinks=true,                              % 启用文字颜色链接模式，去除链接周围难看的彩色方框
+  urlcolor=black,                               % 外部网页链接设为纯黑色，保证双面打印清晰统一
+  linkcolor=black,                              % 目录、公式、图表等内部交叉引用链接设为纯黑色
+  anchorcolor=black,                            % 锚点文本颜色设为纯黑色
+  citecolor=black                               % 参考文献引用标注链接设为纯黑色
+}
+
+% ============================================================================
+% 12. 算法伪代码环境（algorithm2e）双语题注与三线表风格定制
+% ============================================================================
+\makeatletter                                   % 开启 @ 字符作为内部宏名字符权限
+\newcommand{\algoenname}{\textbf{Algo.}}        % 定义算法英文题注前缀为加粗的“Algo.”
+\renewcommand{\algorithmcfname}{算法}           % 将算法中文题注前缀重定义为“算法”
+\setlength\AlCapSkip{1.2ex}                     % 设置算法题注与顶部横线之间的间距为 1.2ex
+\SetAlgoSkip{1pt}                               % 设置算法浮动体与上下文正文之间的额外间距
+\setlength{\algoheightruledefault}{1.5pt}       % 设置算法顶部与标题下方横线的默认线宽为 1.5pt
+
+% 设置算法编号格式为“章号-序号”（例如第 4 章第 1 个算法显示为“4-1”）
+\expandafter\ifx\csname algocf@within\endcsname\relax
+  \renewcommand\thealgocf{\@arabic\c@algocf}    % 若未启用按章编号，则直接输出阿拉伯数字序号
+\else
+  \renewcommand\thealgocf{\csname the\algocf@within\endcsname-\@arabic\c@algocf} % 启用按章编号时输出“章-序号”
+\fi
+
+% 重定义 algorithm2e 内部题注生成宏，使中英文双语算法标题整体居中、行距 1.5em 且不超出算法框宽度
+\renewcommand{\algocf@makecaption}[2]{%
+  \noindent\parbox[t]{\hsize}{%                 % 顶格创建与算法框等宽的段落盒，消除首行缩进与边距叠加导致的 42.4pt 溢出
+    \centering                                  % 盒内题注文字居中对齐
+    \setlength{\baselineskip}{1.5em}%           % 中英文两行标题之间的基线间距设为 1.5em
+    \AlCapFnt{}#1\algocf@typo~\AlCapFnt{}#2%    % 依次输出“算法 X-X”标签（#1）、空格与标题文本（#2）
+  }%
+}
+
+% 定义算法双语题注命令 \AlgoBiCaption{中文算法名}{英文算法名}
+\newcommand{\AlgoBiCaption}[2]{%
+  \caption[#1]{#1\\ \algoenname\ \thealgocf~~#2}% % 第一行输出中文标题，换行后第二行输出“Algo. X-X  英文标题”
+  \addcontentsline{aen}{algoen}{\protect\numberline{ }{#2}}% % 记录英文算法清单索引条目
+}
+
+% 重定义 plainruled 风格下算法底部的收尾横线粗细为 1.5pt，与顶部横线形成对称三线表风格
+\def\@algocf@post@ruled{\kern\interspacealgoruled\hrule height1.5pt\relax}
+% 同步 algorithm 内部 \linewidth 与 \hsize，消除算法内嵌套 itemize 列表时的 42.4pt 宽度溢出警告
+\apptocmd{\@algocf@start}{\setlength{\linewidth}{\hsize}}{}{}
+\makeatother                                    % 关闭 @ 字符权限
+
+% 设置算法输入与输出关键字的中文显示名称
+\SetKwInput{KwIn}{输入}                         % \KwIn{...} 显示为“输入：...”
+\SetKwInput{KwOut}{输出}                        % \KwOut{...} 显示为“输出：...”
+
+% ============================================================================
+% 13. 常用数学算子与正体常数快捷命令（符合规范 3.8.3 节正斜体规定）
+% ============================================================================
+% 规范要求：函数名、微分算子 d、虚数单位 i、自然底数 e 等数学常量与算子一律采用正体
+\renewcommand{\Re}{\operatorname{Re}}           % 复数实部算子 Re（正体）
+\renewcommand{\Im}{\operatorname{Im}}           % 复数虚部算子 Im（正体）
+\newcommand{\mi}{\mathrm{i}}                    % 正体虚数单位 i
+\newcommand{\md}{\mathrm{d}}                    % 正体微分算子 d（如 \int f(x)\,\md x）
+\newcommand{\me}{\mathrm{e}}                    % 正体自然对数底数 e（如 \me^{-x}）
+\DeclareMathOperator{\argmin}{argmin}           % 极小值点算子 argmin（正体）
+\DeclareMathOperator{\supp}{supp}               % 支集算子 supp（正体）
+\DeclareMathOperator{\prox}{prox}               % 近端算子 prox（正体）
+\DeclareMathOperator{\sign}{sign}               % 符号函数算子 sign（正体）

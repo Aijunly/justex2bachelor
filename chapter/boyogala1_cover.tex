@@ -1,0 +1,89 @@
+% -*- coding=utf-8 -*-
+% ============================================================================
+% 文件名称：chapter/boyogala1_cover.tex
+% 文件用途：江苏科技大学本科毕业设计（论文）外封面与内封（扉页）
+% 规范依据：《江苏科技大学本科学位论文撰写要求及格式规范》第 2.1.1、2.1.2、4.3 节及附录 7、8
+% ============================================================================
+
+% -------------------- 论文基本信息配置（请修改为个人信息） --------------------
+\newcommand\studentId{你的学号}                                                 % 学生班级学号
+\newcommand\thesisTitleCN{基于粒子群算法的第一和第二特征值及其单位特征向量的求解} % 中文论文题目（原则上不超过25字，不设副标题）
+\newcommand\thesisTitleEN{Computation of the First and Second Eigenvalues and Their Corresponding Unit Eigenvectors Based on Particle Swarm Optimization} % 英文论文题目
+\newcommand\thesisAuthor{你的名字}                                              % 学生姓名
+\newcommand\supervisor{王俊}                                                    % 指导教师姓名
+\newcommand\majorclass{信息与计算科学}                                          % 专业名称
+\newcommand\institute{理学院}                                                   % 学院名称
+\newcommand\thesisDateOne{2026 年 6 月}                                         % 外封面底部提交日期（阿拉伯数字年月）
+\newcommand\thesisDateTwo{二零二六年六月}                                       % 内封底部提交日期（汉字数字年月）
+
+% ============================================================================
+% 第一页：外封面（规范附录 7：采用教务处统一封面底图 cover1.pdf，信息栏采用四号黑体）
+% ============================================================================
+{%
+  \setlength{\parindent}{0pt}%                                                  % 取消封面段落首行缩进
+  \ThisTileWallPaper{\paperwidth}{\paperheight}{figure/cover1.pdf}%             % 铺设学校统一外封面 PDF 底图
+  \vspace*{13.5cm}%                                                             % 留出上方校徽与“本科毕业设计（论文）”大标题区域
+  \begin{center}%
+    \heiti\fontsize{14pt}{28pt}\selectfont                                      % 显式锁定四号黑体（14pt）与固定 28pt 行高，杜绝受外部行距影响
+    \makebox[6em][r]{学\hspace{1.5em}院}\hspace{0.3em}%
+    \underline{\makebox[15em][c]{\institute}}\par
+    \makebox[6em][r]{专\hspace{1.5em}业}\hspace{0.3em}%
+    \underline{\makebox[15em][c]{\majorclass}}\par
+    \makebox[6em][r]{学生姓名}\hspace{0.3em}%
+    \underline{\makebox[15em][c]{\thesisAuthor}}\par
+    \makebox[6em][r]{班级学号}\hspace{0.3em}%
+    \underline{\makebox[15em][c]{\studentId}}\par
+    \makebox[6em][r]{指导教师}\hspace{0.3em}%
+    \underline{\makebox[15em][c]{\supervisor}}\par
+  \end{center}%
+  \vfill                                                                        % 弹性填充垂直空白，将日期稳固锚定在封面第一页底部，绝不跨页
+  \begin{center}%
+    \heiti\fontsize{14pt}{20pt}\selectfont
+    \makebox[5cm][c]{\thesisDateOne}\par                                        % 底部居中显示“2026 年 6 月”
+  \end{center}%
+  \vspace*{0.6cm}%                                                              % 底部留白缓冲
+}
+
+\newpage
+
+% ============================================================================
+% 第二页：内封 / 扉页（规范附录 8：中文题目二号黑体居中，英文题目 16pt 新罗马体居中，其余四号宋体居中）
+% ============================================================================
+{%
+  \setlength{\parindent}{0pt}%                                                  % 取消内封段落首行缩进
+  \ThisTileWallPaper{\paperwidth}{\paperheight}{figure/cover2.pdf}%             % 铺设内封 PDF 底图（含顶部四号宋体“江苏科技大学本科毕业论文”）
+  \vspace*{2.5cm}%                                                              % 顶部标题与论文中文题目之间的间距
+  \begin{center}%
+    \makebox[15cm][c]{%
+      \parbox{12.5cm}{%
+        \centering\heiti\fontsize{22pt}{30pt}\selectfont                        % 中文题目：二号（22pt）黑体居中，行距 30pt
+        \thesisTitleCN
+      }%
+    }\par
+    \vspace{0.6cm}%                                                             % 中英文题目之间的垂直间距
+    \makebox[15cm][c]{%
+      \parbox{15cm}{%
+        \centering\rmfamily\fontsize{16pt}{22pt}\selectfont                     % 英文题目：Times New Roman 16pt（三号）居中，行距 22pt
+        \thesisTitleEN
+      }%
+    }\par
+  \end{center}%
+
+  \vspace*{3.6cm}%                                                              % 英文题目与署名区之间的垂直间距
+  \begin{center}%
+    \songti\fontsize{14pt}{24pt}\selectfont                                     % 署名区：四号（14pt）宋体居中，固定行距 24pt
+    % 若所在学院要求内封同时打印学号，取消下一行注释即可：
+    % 学生学号：\makebox[4.5em][l]{\studentId}\par
+    学生姓名：\makebox[4.5em][l]{\thesisAuthor}\par
+    指导教师：\makebox[4.5em][l]{\supervisor}\par
+  \end{center}%
+
+  \vfill                                                                        % 弹性填充垂直空白，将校名与日期稳固锚定在内封底部，绝不跨页
+  \begin{center}%
+    \songti\fontsize{14pt}{22pt}\selectfont                                     % 底部校名与日期：四号（14pt）宋体居中
+    \makebox[5cm][c]{江苏科技大学}\par
+    \vspace{0.35cm}%
+    \makebox[5cm][c]{\thesisDateTwo}\par
+  \end{center}%
+  \vspace*{0.6cm}%                                                              % 底部留白缓冲
+}

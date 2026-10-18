@@ -1,0 +1,100 @@
+% -*- coding=utf-8 -*-
+\chapter{附录}
+
+\section*{一、处理碰撞事例的Python代码}
+%\begin{lstlisting}[language={python}, basicstyle = \ttfamily,breaklines = true, caption={Python 源代码}, label=code_1]
+\begin{lstlisting}[language=python,caption={模拟退火算法},label=Code:101]
+kk=2;
+[mdd,ndd]=size(dd);
+while ~isempty(V)
+    [tmpd,j]=min(W(i,V));tmpj=V(j);
+for k=2:ndd
+    [tmp1,jj]=min(dd(1,k)+W(dd(2,k),V));
+    tmp2=V(jj);tt(k-1,:)=[tmp1,tmp2,jj];
+end
+    tmp=[tmpd,tmpj,j;tt];[tmp3,tmp4]=min(tmp(:,1));
+if tmp3==tmpd, ss(1:2,kk)=[i;tmp(tmp4,2)];
+ \end{lstlisting}
+ 
+ \newpage
+ 
+ \section*{二、处理碰撞事例的Julia代码}
+\begin{lstlisting}[language=matlab,caption={模拟退火算法},label=Code:102]
+using LinearAlgebra
+using Random
+
+"""
+PSO求解最小特征值及特征向量
+A: 对称矩阵
+n_particles: 粒子数量
+max_iter: 最大迭代次数
+"""
+function pso_min_eigen(A::Matrix{Float64}; n_particles=50, max_iter=200)
+    n = size(A, 1)
+
+    # 定义目标函数：瑞利商 f(x) = (x'Ax) / (x'x)
+    function rayleigh_quotient(x)
+        return (x' * A * x) / (x' * x)
+    end
+
+    # 初始化粒子位置 (随机单位向量方向) 和速度
+    particles = [randn(n) for _ in 1:n_particles]
+    velocities = [zeros(n) for _ in 1:n_particles]
+
+    # 个体最优位置及其适应度
+    pbest_pos = copy(particles)
+    pbest_val = [rayleigh_quotient(p) for p in particles]
+
+    # 全局最优
+    gbest_idx = argmin(pbest_val)
+    gbest_pos = copy(pbest_pos[gbest_idx])
+    gbest_val = pbest_val[gbest_idx]
+
+    # 超参数
+    w = 0.5   # 惯性权重
+    c1 = 1.5  # 个体学习因子
+    c2 = 1.5  # 全局学习因子
+
+    for _ in 1:max_iter
+        for i in 1:n_particles
+            # 更新速度
+            velocities[i] = w * velocities[i] + 
+                            c1 * rand() * (pbest_pos[i] - particles[i]) + 
+                            c2 * rand() * (gbest_pos - particles[i])
+
+            # 更新位置
+            particles[i] += velocities[i]
+
+            # 计算适应度
+            val = rayleigh_quotient(particles[i])
+
+            # 更新个体最优
+            if val < pbest_val[i]
+                pbest_val[i] = val
+                pbest_pos[i] = copy(particles[i])
+
+                # 更新全局最优
+                if val < gbest_val
+                    gbest_val = val
+                    gbest_pos = copy(particles[i])
+                end
+            end
+        end
+    end
+
+    # 返回结果：特征值与单位特征向量
+    return gbest_val, gbest_pos / norm(gbest_pos)
+end
+
+# --- 测试 ---
+Random.seed!(123)
+A = rand(5, 5)
+A = A' * A # 构造对称正定矩阵
+λ, v = pso_min_eigen(A)
+
+println("PSO计算的最小特征值: ", λ)
+println("对比线性代数库计算: ", minimum(eigvals(A)))
+println("单位特征向量: ", v)
+\end{lstlisting}
+
+ 

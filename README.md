@@ -11,6 +11,15 @@
 > 编译引擎：`XeLaTeX` + `Biber`
 
 ---
+## 微信公众号：博優旮旯-BOYOGALA
+
+欢迎扫码关注作者的微信公众号：
+
+<p align="center"><img src="qr-boyogala.png" width="42%"></p>
+
+一起走进优化求解器与数值计算的科普分享.
+
+---
 
 ## ✨ 特性
 
